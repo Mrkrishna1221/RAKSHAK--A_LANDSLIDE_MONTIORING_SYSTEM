@@ -1,1 +1,143 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@theme {
+  --color-earth-900: #0a0a0b;
+  --color-earth-800: #111113;
+  --color-earth-700: #1a1a1e;
+  --color-earth-600: #242429;
+  --color-earth-500: #2e2e35;
+  --color-earth-400: #3d3d45;
+  --color-earth-300: #5a5a65;
+  --color-earth-200: #8a8a95;
+  --color-earth-100: #b8b8c0;
+  --color-risk-low: #22c55e;
+  --color-risk-moderate: #eab308;
+  --color-risk-high: #f97316;
+  --color-risk-very-high: #ef4444;
+  --color-accent: #3b82f6;
+  --color-accent-dim: #1e3a5f;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3d3d45 transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #0a0a0b;
+  color: #e4e4e7;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+}
+
+.glass {
+  background: rgba(17, 17, 19, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-strong {
+  background: rgba(17, 17, 19, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glow-low {
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
+}
+
+.glow-moderate {
+  box-shadow: 0 0 20px rgba(234, 179, 8, 0.15);
+}
+
+.glow-high {
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.15);
+}
+
+.glow-very-high {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.section-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.section-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .animate-pulse-slow,
+  .animate-float {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Leaflet overrides for dark theme */
+.leaflet-container {
+  background: #111113 !important;
+}
+
+.leaflet-tile-pane {
+  filter: brightness(0.7) contrast(1.2) saturate(0.3);
+}
+
+.leaflet-control-zoom a {
+  background: #1a1a1e !important;
+  color: #e4e4e7 !important;
+  border-color: #2e2e35 !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(17, 17, 19, 0.8) !important;
+  color: #8a8a95 !important;
+}
+
+.leaflet-control-attribution a {
+  color: #3b82f6 !important;
+}
