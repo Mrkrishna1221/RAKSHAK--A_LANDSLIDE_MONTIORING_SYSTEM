@@ -159,6 +159,138 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   border-radius: 8px;
 }
 
+/* Background orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  will-change: transform;
+}
+
+.orb-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+  top: -200px;
+  left: -200px;
+  animation: orb-float-1 25s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%);
+  top: 40%;
+  right: -150px;
+  animation: orb-float-2 30s ease-in-out infinite;
+}
+
+.orb-3 {
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, transparent 70%);
+  bottom: -300px;
+  left: 30%;
+  animation: orb-float-3 35s ease-in-out infinite;
+}
+
+.orb-4 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, transparent 70%);
+  top: 60%;
+  left: 10%;
+  animation: orb-float-4 28s ease-in-out infinite;
+}
+
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(100px, 80px) scale(1.1); }
+  66% { transform: translate(-50px, 120px) scale(0.95); }
+}
+
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-120px, -60px) scale(1.15); }
+  66% { transform: translate(80px, -100px) scale(0.9); }
+}
+
+@keyframes orb-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(150px, -80px) scale(1.05); }
+  66% { transform: translate(-100px, -50px) scale(1.1); }
+}
+
+@keyframes orb-float-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(200px, 100px) scale(1.2); }
+}
+
+/* Aurora waves */
+.aurora {
+  position: absolute;
+  width: 200%;
+  height: 200px;
+  opacity: 0.3;
+  mix-blend-mode: screen;
+}
+
+.aurora-1 {
+  top: 20%;
+  left: -50%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(59, 130, 246, 0.2) 25%,
+    rgba(139, 92, 246, 0.3) 50%,
+    rgba(6, 182, 212, 0.2) 75%,
+    transparent 100%
+  );
+  animation: aurora-flow-1 20s ease-in-out infinite;
+  filter: blur(40px);
+}
+
+.aurora-2 {
+  top: 60%;
+  left: -50%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(236, 72, 153, 0.15) 25%,
+    rgba(59, 130, 246, 0.2) 50%,
+    rgba(16, 185, 129, 0.15) 75%,
+    transparent 100%
+  );
+  animation: aurora-flow-2 25s ease-in-out infinite;
+  filter: blur(50px);
+}
+
+@keyframes aurora-flow-1 {
+  0%, 100% { transform: translateX(0) scaleY(1); }
+  50% { transform: translateX(25%) scaleY(1.2); }
+}
+
+@keyframes aurora-flow-2 {
+  0%, 100% { transform: translateX(0) scaleY(1); }
+  50% { transform: translateX(-25%) scaleY(0.8); }
+}
+
+/* Contour pulse animation */
+@keyframes contour-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+.animate-contour-pulse {
+  animation: contour-pulse 8s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb, .aurora, .animate-contour-pulse {
+    animation: none !important;
+  }
+}
+
 /* Animated gradient border for special cards */
 @keyframes borderGlow {
   0%, 100% {
