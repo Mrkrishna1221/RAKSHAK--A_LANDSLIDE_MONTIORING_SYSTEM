@@ -121,10 +121,33 @@ body {
 /* Leaflet overrides for dark theme */
 .leaflet-container {
   background: #111113 !important;
+  font-family: 'Inter', sans-serif !important;
 }
 
+/* CartoDB Dark Matter is already dark, no filter needed */
 .leaflet-tile-pane {
-  filter: brightness(0.7) contrast(1.2) saturate(0.3);
+  opacity: 0.95;
+}
+
+/* Dark popup styling */
+.leaflet-popup-content-wrapper {
+  background: rgba(17, 17, 19, 0.95) !important;
+  color: #e4e4e7 !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(17, 17, 19, 0.95) !important;
+}
+
+.leaflet-popup-close-button {
+  color: #8a8a95 !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #e4e4e7 !important;
 }
 
 .leaflet-control-zoom a {

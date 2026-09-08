@@ -7,6 +7,7 @@ import { useInView, useToast, useReducedMotion } from "./hooks/useAnimations";
 const RainScene = lazy(() => import("./components/visualization/RainScene"));
 const TerrainScene = lazy(() => import("./components/visualization/TerrainScene"));
 const RiskMap = lazy(() => import("./components/map/RiskMap"));
+const IndiaOverviewMap = lazy(() => import("./components/map/IndiaOverviewMap"));
 
 // Eager load lighter components
 import RiskScore from "./components/risk/RiskScore";
@@ -99,7 +100,7 @@ function App() {
     { id: "terrain", label: "Terrain" },
     { id: "rainfall", label: "Rainfall" },
     { id: "deformation", label: "Deformation" },
-    { id: "map", label: "Map" },
+    { id: "map", label: "India Network" },
     { id: "pipeline", label: "How it Works" },
   ];
 
@@ -183,8 +184,8 @@ function App() {
           </h1>
 
           <p className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed">
-            RAKSHAK combines terrain susceptibility, rainfall accumulation, ground deformation,
-            geological conditions and historical landslide evidence to estimate dynamic landslide risk.
+            RAKSHAK monitors India's landslide-prone Himalayan and Western Ghats regions by combining terrain susceptibility, 
+            rainfall accumulation, ground deformation, geological conditions and historical landslide evidence to estimate dynamic landslide risk.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -342,15 +343,28 @@ function App() {
                 </div>
               </div>
 
-              {/* Map */}
+              {/* India Overview Map */}
               <div id="map" className="glass rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <MapPin className="w-4 h-4 text-blue-400" />
                   <h3 className="text-sm font-semibold tracking-widest text-gray-300 uppercase">
-                    Risk Map — {riskData.location}
+                    National Monitoring Network — India
                   </h3>
                 </div>
-                <div className="h-72 md:h-96 rounded-lg overflow-hidden">
+                <div className="h-72 md:h-96 rounded-lg overflow-hidden mb-4">
+                  <Suspense fallback={<div className="w-full h-full bg-earth-800 animate-pulse rounded-lg" />}>
+                    <IndiaOverviewMap />
+                  </Suspense>
+                </div>
+
+                {/* Detailed Local Map */}
+                <div className="flex items-center gap-2 mb-3">
+                  <MapPin className="w-3.5 h-3.5 text-blue-400" />
+                  <h4 className="text-xs font-semibold tracking-widest text-gray-400 uppercase">
+                    Local Risk Map — {riskData.location}
+                  </h4>
+                </div>
+                <div className="h-64 md:h-80 rounded-lg overflow-hidden">
                   <Suspense fallback={<div className="w-full h-full bg-earth-800 animate-pulse rounded-lg" />}>
                     <RiskMap
                       latitude={riskData.latitude}
@@ -432,10 +446,12 @@ function App() {
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-blue-400" />
             <span className="text-sm font-semibold text-gray-300">RAKSHAK</span>
-            <span className="text-xs text-gray-500">Landslide Early Warning & Risk Assessment System</span>
+            <span className="text-xs text-gray-500">Landslide Early Warning & Risk Assessment System — India</span>
           </div>
           <div className="flex items-center gap-4 text-xs text-gray-500">
             <span>Dynamic Risk Assessment — Not a guaranteed prediction</span>
+            <span className="hidden sm:inline">•</span>
+            <span className="hidden sm:inline">Map: CartoDB / OpenStreetMap</span>
             <span className="hidden sm:inline">•</span>
             <span className="hidden sm:inline">Demo Mode Active</span>
           </div>
