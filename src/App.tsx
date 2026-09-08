@@ -1,4 +1,5 @@
 import React, { useState, useCallback, lazy, Suspense, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import { RiskData, locations, mockRiskData } from "./data/mockRiskData";
 import { fetchRiskData } from "./services/riskApi";
 import { useInView, useToast, useReducedMotion } from "./hooks/useAnimations";
@@ -21,6 +22,11 @@ import EarlyWarning from "./components/alerts/EarlyWarning";
 import MLSection from "./components/dashboard/MLSection";
 import HistoricalLandslides from "./components/dashboard/HistoricalLandslides";
 import Toast from "./components/ui/Toast";
+import ScrollProgress from "./components/ui/ScrollProgress";
+import ParallaxBackground from "./components/ui/ParallaxBackground";
+import SectionDivider from "./components/ui/SectionDivider";
+import ScrollHeroFade from "./components/ui/ScrollHeroFade";
+import { ScrollReveal, StaggerContainer, StaggerItem, ParallaxSection, TextReveal } from "./components/ui/ScrollEffects";
 
 import {
   Search,
@@ -106,6 +112,12 @@ function App() {
 
   return (
     <div className="min-h-screen bg-earth-900 text-gray-200">
+      {/* Scroll Progress Indicator */}
+      <ScrollProgress />
+
+      {/* Parallax Background */}
+      <ParallaxBackground />
+
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -169,51 +181,68 @@ function App() {
         <div className="absolute inset-0 bg-gradient-to-r from-earth-900/40 via-transparent to-earth-900/40 z-10" />
 
         {/* Content */}
+        <ScrollHeroFade>
         <div className="relative z-20 text-center px-4 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6">
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs text-gray-400">System Active — Monitoring 6 Locations</span>
-          </div>
+          <ScrollReveal direction="fade" delay={0.2}>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs text-gray-400">System Active — Monitoring 6 Locations</span>
+            </div>
+          </ScrollReveal>
 
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
-            Predict instability
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
-              before the slope fails.
-            </span>
-          </h1>
+          <ScrollReveal direction="up" delay={0.4} distance={80}>
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
+              <TextReveal text="Predict instability" className="block" delay={0.3} />
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
+                <TextReveal text="before the slope fails." className="block" delay={0.6} />
+              </span>
+            </h1>
+          </ScrollReveal>
 
-          <p className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed">
-            RAKSHAK monitors India's landslide-prone Himalayan and Western Ghats regions by combining terrain susceptibility, 
-            rainfall accumulation, ground deformation, geological conditions and historical landslide evidence to estimate dynamic landslide risk.
-          </p>
+          <ScrollReveal direction="up" delay={0.6}>
+            <p className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed">
+              RAKSHAK monitors India's landslide-prone Himalayan and Western Ghats regions by combining terrain susceptibility, 
+              rainfall accumulation, ground deformation, geological conditions and historical landslide evidence to estimate dynamic landslide risk.
+            </p>
+          </ScrollReveal>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href="#dashboard"
-              className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
-            >
-              Analyze Location
-            </a>
-            <a
-              href="#pipeline"
-              className="px-6 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-sm font-medium transition-colors"
-            >
-              Explore System
-            </a>
-          </div>
+          <ScrollReveal direction="up" delay={0.8}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href="#dashboard"
+                className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+              >
+                Analyze Location
+              </a>
+              <a
+                href="#pipeline"
+                className="px-6 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-sm font-medium transition-colors"
+              >
+                Explore System
+              </a>
+            </div>
+          </ScrollReveal>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
+        <motion.div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          whileInView={{ opacity: 1 }}
+        >
+          <span className="text-[10px] text-gray-500 uppercase tracking-widest">Scroll</span>
           <ChevronDown className="w-5 h-5 text-gray-500 animate-bounce" />
-        </div>
+        </motion.div>
+        </ScrollHeroFade>
       </section>
 
       {/* Location Search & Dashboard */}
       <section id="dashboard" ref={dashboardRef} className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Location Selector */}
+          <ScrollReveal direction="up" delay={0.1}>
           <div className="glass rounded-xl p-6 mb-8">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="w-4 h-4 text-blue-400" />
@@ -291,6 +320,7 @@ function App() {
               ))}
             </div>
           </div>
+          </ScrollReveal>
 
           {/* Loading State */}
           {isAnalyzing && (
@@ -303,59 +333,78 @@ function App() {
           {riskData && !isAnalyzing && (
             <div className="space-y-6">
               {/* Early Warning */}
-              <EarlyWarning data={riskData} />
+              <ScrollReveal direction="up" delay={0.1}>
+                <EarlyWarning data={riskData} />
+              </ScrollReveal>
 
               {/* Main grid */}
-              <div className="grid lg:grid-cols-2 gap-6">
-                <RiskScore data={riskData} />
-                <RiskFactors data={riskData} />
-              </div>
+              <StaggerContainer staggerDelay={0.15}>
+                <div className="grid lg:grid-cols-2 gap-6">
+                  <StaggerItem>
+                    <RiskScore data={riskData} />
+                  </StaggerItem>
+                  <StaggerItem>
+                    <RiskFactors data={riskData} />
+                  </StaggerItem>
+                </div>
+              </StaggerContainer>
 
               {/* 3D Terrain */}
-              <div id="terrain" className="glass rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Mountain className="w-4 h-4 text-blue-400" />
-                  <h3 className="text-sm font-semibold tracking-widest text-gray-300 uppercase">
-                    3D Risk Terrain
-                  </h3>
+              <ScrollReveal direction="scale" delay={0.1}>
+                <div id="terrain" className="glass rounded-xl p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Mountain className="w-4 h-4 text-blue-400" />
+                    <h3 className="text-sm font-semibold tracking-widest text-gray-300 uppercase">
+                      3D Risk Terrain
+                    </h3>
+                  </div>
+                  <div className="h-64 md:h-80 rounded-lg overflow-hidden bg-earth-800">
+                    <Suspense fallback={<div className="w-full h-full bg-earth-800 animate-pulse" />}>
+                      <TerrainScene
+                        riskLevel={riskData.riskLevel}
+                        rainfallIntensity={riskData.rainfall.twentyFourHour}
+                        deformationLevel={riskData.deformation.current}
+                      />
+                    </Suspense>
+                  </div>
                 </div>
-                <div className="h-64 md:h-80 rounded-lg overflow-hidden bg-earth-800">
-                  <Suspense fallback={<div className="w-full h-full bg-earth-800 animate-pulse" />}>
-                    <TerrainScene
-                      riskLevel={riskData.riskLevel}
-                      rainfallIntensity={riskData.rainfall.twentyFourHour}
-                      deformationLevel={riskData.deformation.current}
-                    />
-                  </Suspense>
-                </div>
-              </div>
+              </ScrollReveal>
 
               {/* Terrain Info */}
-              <TerrainInfo data={riskData} />
+              <ScrollReveal direction="up" delay={0.1}>
+                <TerrainInfo data={riskData} />
+              </ScrollReveal>
 
               {/* Rainfall & Deformation */}
-              <div className="grid lg:grid-cols-2 gap-6">
-                <div id="rainfall">
-                  <RainfallAnalysis data={riskData} />
+              <StaggerContainer staggerDelay={0.2}>
+                <div className="grid lg:grid-cols-2 gap-6">
+                  <StaggerItem>
+                    <div id="rainfall">
+                      <RainfallAnalysis data={riskData} />
+                    </div>
+                  </StaggerItem>
+                  <StaggerItem>
+                    <div id="deformation">
+                      <GroundDeformation data={riskData} />
+                    </div>
+                  </StaggerItem>
                 </div>
-                <div id="deformation">
-                  <GroundDeformation data={riskData} />
-                </div>
-              </div>
+              </StaggerContainer>
 
               {/* India Overview Map */}
-              <div id="map" className="glass rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <MapPin className="w-4 h-4 text-blue-400" />
-                  <h3 className="text-sm font-semibold tracking-widest text-gray-300 uppercase">
-                    National Monitoring Network — India
-                  </h3>
-                </div>
-                <div className="h-72 md:h-96 rounded-lg overflow-hidden mb-4">
-                  <Suspense fallback={<div className="w-full h-full bg-earth-800 animate-pulse rounded-lg" />}>
-                    <IndiaOverviewMap />
-                  </Suspense>
-                </div>
+              <ScrollReveal direction="up" delay={0.1}>
+                <div id="map" className="glass rounded-xl p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <MapPin className="w-4 h-4 text-blue-400" />
+                    <h3 className="text-sm font-semibold tracking-widest text-gray-300 uppercase">
+                      National Monitoring Network — India
+                    </h3>
+                  </div>
+                  <div className="h-72 md:h-96 rounded-lg overflow-hidden mb-4">
+                    <Suspense fallback={<div className="w-full h-full bg-earth-800 animate-pulse rounded-lg" />}>
+                      <IndiaOverviewMap />
+                    </Suspense>
+                  </div>
 
                 {/* Detailed Local Map */}
                 <div className="flex items-center gap-2 mb-3">
@@ -374,36 +423,48 @@ function App() {
                     />
                   </Suspense>
                 </div>
-              </div>
+                </div>
+              </ScrollReveal>
             </div>
           )}
         </div>
       </section>
 
       {/* Data Pipeline */}
+      <SectionDivider variant="gradient" />
       <section id="pipeline" className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <DataPipeline />
+          <ScrollReveal direction="up" delay={0.1}>
+            <DataPipeline />
+          </ScrollReveal>
         </div>
       </section>
 
       {/* ML Section */}
+      <SectionDivider variant="dots" />
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <MLSection />
+          <ScrollReveal direction="left" delay={0.1}>
+            <MLSection />
+          </ScrollReveal>
         </div>
       </section>
 
       {/* Historical Landslides */}
+      <SectionDivider variant="wave" />
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <HistoricalLandslides />
+          <ScrollReveal direction="right" delay={0.1}>
+            <HistoricalLandslides />
+          </ScrollReveal>
         </div>
       </section>
 
       {/* Data Sources */}
+      <SectionDivider variant="line" />
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
+          <ScrollReveal direction="up" delay={0.1}>
           <div className="glass rounded-xl p-6 md:p-8">
             <div className="flex items-center gap-2 mb-6">
               <Database className="w-4 h-4 text-blue-400" />
@@ -437,6 +498,7 @@ function App() {
               All data sources shown are for demonstration purposes. In production, these would be connected to live data feeds and APIs.
             </p>
           </div>
+          </ScrollReveal>
         </div>
       </section>
 

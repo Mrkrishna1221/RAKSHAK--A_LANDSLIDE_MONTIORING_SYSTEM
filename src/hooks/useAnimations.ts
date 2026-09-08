@@ -80,6 +80,51 @@ export function useIsMobile(): boolean {
   return mobile;
 }
 
+export function useScrollProgress() {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = docHeight > 0 ? scrollTop / docHeight : 0;
+      setProgress(scrollPercent);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return progress;
+}
+
+export function useParallax(speed = 0.5) {
+  const [offset, setOffset] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ref.current) return;
+      const rect = ref.current.getBoundingClientRect();
+      const scrolled = window.scrollY;
+      const elementTop = rect.top + scrolled;
+      const viewportHeight = window.innerHeight;
+      
+      if (rect.top < viewportHeight && rect.bottom > 0) {
+        const relativeScroll = scrolled - elementTop + viewportHeight;
+        setOffset(relativeScroll * speed);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [speed]);
+
+  return { ref, offset };
+}
+
 export function useToast() {
   const [toast, setToast] = useState<{
     visible: boolean;
