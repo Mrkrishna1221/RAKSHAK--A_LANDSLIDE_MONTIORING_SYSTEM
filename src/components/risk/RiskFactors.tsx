@@ -1,5 +1,6 @@
-import React from "react";
-import { useInView } from "../../hooks/useAnimations";
+import React, { useEffect, useRef } from "react";
+import anime from "animejs";
+import { useInView, useReducedMotion } from "../../hooks/useAnimations";
 import { RiskData } from "../../data/mockRiskData";
 import { AlertTriangle, Zap } from "lucide-react";
 
@@ -16,35 +17,111 @@ const severityColors = {
 
 export default function RiskFactors({ data }: RiskFactorsProps) {
   const { ref, isInView } = useInView(0.2);
+  const barsRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const driverRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!isInView || reducedMotion) return;
+
+    // Animate title
+    if (titleRef.current) {
+      anime({
+        targets: titleRef.current,
+        translateX: [-30, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: "easeOutExpo",
+      });
+    }
+
+    // Animate factor bars with stagger
+    if (barsRef.current) {
+      const bars = barsRef.current.querySelectorAll(".factor-bar");
+      anime({
+        targets: bars,
+        width: (el: HTMLElement) => `${el.dataset.value}%`,
+        opacity: [0, 1],
+        delay: anime.stagger(150, { start: 300 }),
+        duration: 1200,
+        easing: "easeOutExpo",
+      });
+
+      // Animate factor labels
+      const labels = barsRef.current.querySelectorAll(".factor-label");
+      anime({
+        targets: labels,
+        translateX: [-20, 0],
+        opacity: [0, 1],
+        delay: anime.stagger(100, { start: 200 }),
+        duration: 600,
+        easing: "easeOutExpo",
+      });
+
+      // Animate severity badges
+      const badges = barsRef.current.querySelectorAll(".factor-badge");
+      anime({
+        targets: badges,
+        scale: [0.5, 1],
+        opacity: [0, 1],
+        delay: anime.stagger(100, { start: 400 }),
+        duration: 500,
+        easing: "easeOutBack",
+      });
+    }
+
+    // Animate primary driver box
+    if (driverRef.current) {
+      anime({
+        targets: driverRef.current,
+        translateY: [20, 0],
+        opacity: [0, 1],
+        delay: 1000,
+        duration: 800,
+        easing: "easeOutExpo",
+      });
+    }
+  }, [isInView, reducedMotion]);
 
   return (
     <div ref={ref} className="glass rounded-xl p-6">
-      <div className="flex items-center gap-2 mb-5">
+      <div ref={titleRef} className="flex items-center gap-2 mb-5" style={{ opacity: reducedMotion ? 1 : 0 }}>
         <Zap className="w-4 h-4 text-amber-400" />
         <h3 className="text-sm font-semibold tracking-widest text-gray-300 uppercase">
           Why is the risk {data.riskLevel === "VERY_HIGH" ? "very high" : data.riskLevel.toLowerCase()}?
         </h3>
       </div>
 
-      <div className="space-y-4">
+      <div ref={barsRef} className="space-y-4">
         {data.factors.map((factor, index) => {
           const color = severityColors[factor.severity];
           return (
             <div key={index} className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-300">{factor.name}</span>
-                <span className="text-xs font-medium px-2 py-0.5 rounded" style={{ color, backgroundColor: `${color}15` }}>
+                <span className="text-sm text-gray-300 factor-label" style={{ opacity: reducedMotion ? 1 : 0 }}>
+                  {factor.name}
+                </span>
+                <span
+                  className="text-xs font-medium px-2 py-0.5 rounded factor-badge"
+                  style={{
+                    color,
+                    backgroundColor: `${color}15`,
+                    opacity: reducedMotion ? 1 : 0,
+                  }}
+                >
                   {factor.severity.replace("_", " ")}
                 </span>
               </div>
               <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-1000 ease-out"
+                  className="factor-bar h-full rounded-full"
+                  data-value={factor.value}
                   style={{
-                    width: isInView ? `${factor.value}%` : "0%",
+                    width: reducedMotion ? `${factor.value}%` : "0%",
                     backgroundColor: color,
-                    transitionDelay: `${index * 150}ms`,
                     boxShadow: `0 0 8px ${color}40`,
+                    opacity: reducedMotion ? 1 : 0,
                   }}
                 />
               </div>
@@ -53,7 +130,11 @@ export default function RiskFactors({ data }: RiskFactorsProps) {
         })}
       </div>
 
-      <div className="mt-5 p-3 rounded-lg bg-white/[0.03] border border-white/5">
+      <div
+        ref={driverRef}
+        className="mt-5 p-3 rounded-lg bg-white/[0.03] border border-white/5"
+        style={{ opacity: reducedMotion ? 1 : 0 }}
+      >
         <div className="flex items-start gap-2">
           <AlertTriangle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
           <div>

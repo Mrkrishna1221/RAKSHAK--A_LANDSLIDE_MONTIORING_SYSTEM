@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import anime from "animejs";
+import { useReducedMotion } from "../../hooks/useAnimations";
 import { RiskData } from "../../data/mockRiskData";
 import { AlertTriangle, ShieldAlert } from "lucide-react";
 
@@ -7,12 +9,44 @@ interface EarlyWarningProps {
 }
 
 export default function EarlyWarning({ data }: EarlyWarningProps) {
+  const reducedMotion = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (reducedMotion || !containerRef.current) return;
+
+    // Entrance animation
+    anime({
+      targets: containerRef.current,
+      translateX: [-30, 0],
+      opacity: [0, 1],
+      duration: 800,
+      easing: "easeOutExpo",
+    });
+
+    // Pulse effect for VERY_HIGH
+    if (data.riskLevel === "VERY_HIGH") {
+      anime({
+        targets: containerRef.current,
+        boxShadow: [
+          "0 0 0px rgba(239, 68, 68, 0)",
+          "0 0 30px rgba(239, 68, 68, 0.2)",
+          "0 0 0px rgba(239, 68, 68, 0)",
+        ],
+        duration: 2000,
+        easing: "easeInOutSine",
+        loop: true,
+      });
+    }
+  }, [data.riskLevel, reducedMotion]);
+
   if (data.riskLevel !== "HIGH" && data.riskLevel !== "VERY_HIGH") return null;
 
   const isVeryHigh = data.riskLevel === "VERY_HIGH";
 
   return (
     <div
+      ref={containerRef}
       className={`rounded-xl p-5 border ${
         isVeryHigh
           ? "bg-red-950/30 border-red-500/30"
@@ -20,6 +54,7 @@ export default function EarlyWarning({ data }: EarlyWarningProps) {
       }`}
       role="alert"
       aria-live="polite"
+      style={{ opacity: reducedMotion ? 1 : 0 }}
     >
       <div className="flex items-start gap-3">
         <div className={`p-2 rounded-lg ${isVeryHigh ? "bg-red-500/20" : "bg-amber-500/20"}`}>

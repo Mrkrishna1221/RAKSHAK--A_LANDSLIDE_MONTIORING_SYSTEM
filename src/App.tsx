@@ -26,6 +26,10 @@ import ScrollProgress from "./components/ui/ScrollProgress";
 import ParallaxBackground from "./components/ui/ParallaxBackground";
 import SectionDivider from "./components/ui/SectionDivider";
 import ScrollHeroFade from "./components/ui/ScrollHeroFade";
+import GpsTracker from "./components/map/GpsTracker";
+import { AnimeReveal, AnimeStagger, AnimeCounter, AnimeProgressBar, AnimeTextSplit } from "./components/ui/AnimeEffects";
+import MagneticButton from "./components/ui/MagneticButton";
+import SectionTitle from "./components/ui/SectionTitle";
 import { ScrollReveal, StaggerContainer, StaggerItem, ParallaxSection, TextReveal } from "./components/ui/ScrollEffects";
 
 import {
@@ -38,6 +42,7 @@ import {
   ExternalLink,
   Menu,
   X,
+  Navigation,
 } from "lucide-react";
 
 function App() {
@@ -127,6 +132,13 @@ function App() {
             <span className="hidden sm:inline text-[10px] text-gray-500 ml-1 px-1.5 py-0.5 rounded bg-white/5">
               Landslide Early Warning
             </span>
+            <span className="hidden md:flex items-center gap-1.5 ml-2 text-[10px] text-emerald-400">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              LIVE
+            </span>
           </div>
 
           {/* Desktop nav */}
@@ -140,6 +152,14 @@ function App() {
                 {s.label}
               </a>
             ))}
+            <a
+              href="#dashboard"
+              className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1"
+              title="GPS Track My Location"
+            >
+              <Navigation className="w-3 h-3" />
+              GPS
+            </a>
           </div>
 
           {/* Mobile menu toggle */}
@@ -209,25 +229,57 @@ function App() {
 
           <ScrollReveal direction="up" delay={0.8}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <a
-                href="#dashboard"
+              <MagneticButton
                 className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+                onClick={() => document.getElementById("dashboard")?.scrollIntoView({ behavior: "smooth" })}
+                strength={0.2}
               >
                 Analyze Location
-              </a>
-              <a
-                href="#pipeline"
+              </MagneticButton>
+              <MagneticButton
                 className="px-6 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-sm font-medium transition-colors"
+                onClick={() => document.getElementById("pipeline")?.scrollIntoView({ behavior: "smooth" })}
+                strength={0.2}
               >
                 Explore System
-              </a>
+              </MagneticButton>
             </div>
           </ScrollReveal>
         </div>
 
+        {/* Stats bar */}
+        <ScrollReveal direction="up" delay={1.2}>
+          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex items-center gap-6 md:gap-10">
+            <div className="text-center">
+              <div className="text-xl md:text-2xl font-bold text-white">
+                <AnimeCounter value={6} />
+              </div>
+              <div className="text-[10px] text-gray-500 uppercase tracking-wider">Locations</div>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="text-center">
+              <div className="text-xl md:text-2xl font-bold text-white">
+                <AnimeCounter value={24} suffix="/7" />
+              </div>
+              <div className="text-[10px] text-gray-500 uppercase tracking-wider">Monitoring</div>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="text-center">
+              <div className="text-xl md:text-2xl font-bold text-emerald-400 flex items-center gap-1">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                Active
+              </div>
+              <div className="text-[10px] text-gray-500 uppercase tracking-wider">System</div>
+            </div>
+          </div>
+        </ScrollReveal>
+
         {/* Scroll indicator */}
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           whileInView={{ opacity: 1 }}
@@ -302,6 +354,7 @@ function App() {
                   "ANALYZE"
                 )}
               </button>
+              <GpsTracker onSelectLocation={handleLocationSelect} />
             </div>
 
             <div className="flex flex-wrap gap-2 mt-3">
