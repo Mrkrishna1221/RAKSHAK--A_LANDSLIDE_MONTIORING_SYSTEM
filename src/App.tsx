@@ -27,6 +27,7 @@ import ParallaxBackground from "./components/ui/ParallaxBackground";
 import SectionDivider from "./components/ui/SectionDivider";
 import ScrollHeroFade from "./components/ui/ScrollHeroFade";
 import GpsTracker from "./components/map/GpsTracker";
+import LiveDashboard from "./components/live/LiveDashboard";
 import { AnimeReveal, AnimeStagger, AnimeCounter, AnimeProgressBar, AnimeTextSplit } from "./components/ui/AnimeEffects";
 import MagneticButton from "./components/ui/MagneticButton";
 import SectionTitle from "./components/ui/SectionTitle";
@@ -108,6 +109,7 @@ function App() {
 
   const navSections = [
     { id: "dashboard", label: "Dashboard" },
+    { id: "live", label: "Live AI" },
     { id: "terrain", label: "Terrain" },
     { id: "rainfall", label: "Rainfall" },
     { id: "deformation", label: "Deformation" },
@@ -132,12 +134,12 @@ function App() {
             <span className="hidden sm:inline text-[10px] text-gray-500 ml-1 px-1.5 py-0.5 rounded bg-white/5">
               Landslide Early Warning
             </span>
-            <span className="hidden md:flex items-center gap-1.5 ml-2 text-[10px] text-emerald-400">
+            <span className="hidden md:flex items-center gap-1.5 ml-2 text-[10px] text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              LIVE
+              ML ACTIVE
             </span>
           </div>
 
@@ -480,6 +482,20 @@ function App() {
               </ScrollReveal>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Live Real-Time Dashboard */}
+      <SectionDivider variant="wave" />
+      <section id="live" className="py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          <ScrollReveal direction="up" delay={0.1}>
+            <div className="mb-8 text-center">
+              <h2 className="text-3xl font-bold text-white mb-2">Real-Time ML Prediction Engine</h2>
+              <p className="text-gray-400">Live sensor data feeding ensemble ML models for dynamic risk assessment</p>
+            </div>
+            {riskData && <LiveDashboard baseData={riskData} />}
+          </ScrollReveal>
         </div>
       </section>
 
