@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { RiskData } from "../data/mockRiskData";
-import { getEngine, RealTimeEngine, SensorReading, TimeSeriesPoint, Anomaly } from "../services/realTimeEngine";
+import { getEngine, ProfessionalRealTimeEngine, SensorReading, TimeSeriesPoint, Anomaly, SensorStatus } from "../services/realTimeEngine";
 import { getMLEngine, MLEngine, ModelOutput } from "../services/mlEngine";
 
 export interface RealTimeState {
@@ -9,6 +9,7 @@ export interface RealTimeState {
   deformationHistory: TimeSeriesPoint[];
   riskHistory: TimeSeriesPoint[];
   anomalies: Anomaly[];
+  sensorStatuses: SensorStatus[];
   mlOutput: ModelOutput | null;
   isRunning: boolean;
 }
@@ -20,11 +21,12 @@ export function useRealTimeData(baseData: RiskData, updateInterval = 3000) {
     deformationHistory: [],
     riskHistory: [],
     anomalies: [],
+    sensorStatuses: [],
     mlOutput: null,
     isRunning: false,
   });
 
-  const [engine, setEngine] = useState<RealTimeEngine | null>(null);
+  const [engine, setEngine] = useState<ProfessionalRealTimeEngine | null>(null);
   const [mlEngine, setMLEngine] = useState<MLEngine | null>(null);
 
   // Initialize engines
@@ -46,6 +48,7 @@ export function useRealTimeData(baseData: RiskData, updateInterval = 3000) {
         deformationHistory: rtEngine.getDeformationHistory(),
         riskHistory: rtEngine.getRiskHistory(),
         anomalies: rtEngine.getAnomalies(),
+        sensorStatuses: rtEngine.getSensorStatuses(),
         mlOutput: output,
         isRunning: false,
       });
@@ -70,6 +73,7 @@ export function useRealTimeData(baseData: RiskData, updateInterval = 3000) {
           deformationHistory: engine.getDeformationHistory(),
           riskHistory: engine.getRiskHistory(),
           anomalies: engine.getAnomalies(),
+          sensorStatuses: engine.getSensorStatuses(),
           mlOutput: output,
           isRunning: true,
         });
