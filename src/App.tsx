@@ -28,6 +28,7 @@ import SectionDivider from "./components/ui/SectionDivider";
 import ScrollHeroFade from "./components/ui/ScrollHeroFade";
 import GpsTracker from "./components/map/GpsTracker";
 import LiveDashboard from "./components/live/LiveDashboard";
+import RealTimeDashboard from "./components/RealTimeDashboard";
 import { AnimeReveal, AnimeStagger, AnimeCounter, AnimeProgressBar, AnimeTextSplit } from "./components/ui/AnimeEffects";
 import MagneticButton from "./components/ui/MagneticButton";
 import SectionTitle from "./components/ui/SectionTitle";
@@ -108,6 +109,7 @@ function App() {
   };
 
   const navSections = [
+    { id: "realtime", label: "🛰️ Live" },
     { id: "dashboard", label: "Dashboard" },
     { id: "live", label: "Live AI" },
     { id: "terrain", label: "Terrain" },
@@ -291,6 +293,28 @@ function App() {
         </motion.div>
         </ScrollHeroFade>
       </section>
+
+      {/* Real-Time Dashboard - Live GPS + Weather + Risk */}
+      <section id="realtime" className="py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          <ScrollReveal direction="up" delay={0.1}>
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">
+                🛰️ Live Location Monitoring
+              </h2>
+              <p className="text-gray-400">
+                Real-time weather, rainfall, and risk assessment at your exact GPS coordinates
+              </p>
+              <p className="text-gray-500 text-xs mt-2">
+                Data sources: Open-Meteo API • Browser Geolocation • Open Elevation API
+              </p>
+            </div>
+            <RealTimeDashboard />
+          </ScrollReveal>
+        </div>
+      </section>
+
+      <SectionDivider variant="wave" />
 
       {/* Location Search & Dashboard */}
       <section id="dashboard" ref={dashboardRef} className="py-16 px-4">
