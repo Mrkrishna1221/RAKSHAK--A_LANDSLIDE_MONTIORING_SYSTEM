@@ -1,6 +1,7 @@
 import React, { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { useIsMobile } from "../../hooks/useAnimations";
 
 interface TerrainSceneProps {
   riskLevel: "LOW" | "MODERATE" | "HIGH" | "VERY_HIGH";
@@ -18,9 +19,12 @@ const riskColors = {
 function RiskTerrain({ riskLevel, rainfallIntensity = 50, deformationLevel = 30 }: TerrainSceneProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const wireRef = useRef<THREE.LineSegments>(null);
+  const isMobile = useIsMobile();
 
   const geometry = useMemo(() => {
-    const geo = new THREE.PlaneGeometry(12, 12, 60, 60);
+    // Reduced resolution for better performance
+    const segments = isMobile ? 30 : 50;
+    const geo = new THREE.PlaneGeometry(12, 12, segments, segments);
     const pos = geo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
@@ -140,12 +144,19 @@ export default function TerrainScene({
   rainfallIntensity = 50,
   deformationLevel = 30,
 }: TerrainSceneProps) {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="w-full h-full">
       <Canvas
         camera={{ position: [0, 4, 10], fov: 50 }}
-        dpr={[1, 1.5]}
-        gl={{ antialias: true, alpha: true }}
+        dpr={isMobile ? [1, 1] : [1, 1.5]}
+        gl={{ 
+          antialias: !isMobile, 
+          alpha: true,
+          powerPreference: "high-performance",
+          stencil: false
+        }}
       >
         <fog attach="fog" args={["#0a0a0b", 8, 25]} />
         <ambientLight intensity={0.4} />

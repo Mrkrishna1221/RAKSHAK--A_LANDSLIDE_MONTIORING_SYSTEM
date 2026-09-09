@@ -194,7 +194,7 @@ function App() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden py-20">
         {/* 3D Background */}
         <Suspense fallback={<div className="absolute inset-0 bg-earth-900" />}>
           {!reducedMotion && <RainScene rainIntensity={getRainIntensity()} />}
@@ -206,32 +206,61 @@ function App() {
 
         {/* Content */}
         <ScrollHeroFade>
-        <div className="relative z-20 text-center px-4 max-w-4xl mx-auto">
+        <div className="relative z-20 flex flex-col items-center text-center px-4 max-w-4xl mx-auto gap-6">
           <ScrollReveal direction="fade" delay={0.2}>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
               <span className="text-xs text-gray-400">System Active — Monitoring 6 Locations</span>
             </div>
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={0.4} distance={80}>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
-              <TextReveal text="Predict instability" className="block" delay={0.3} />
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
-                <TextReveal text="before the slope fails." className="block" delay={0.6} />
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
+              <span className="block mb-2">Predict Instability</span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
+                Before the Slope Fails
               </span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={0.6}>
-            <p className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed">
+            <p className="text-sm md:text-base text-gray-400 max-w-[850px] mx-auto leading-relaxed">
               RAKSHAK monitors India's landslide-prone Himalayan and Western Ghats regions by combining terrain susceptibility, 
               rainfall accumulation, ground deformation, geological conditions and historical landslide evidence to estimate dynamic landslide risk.
             </p>
           </ScrollReveal>
 
+          {/* Stats bar */}
           <ScrollReveal direction="up" delay={0.8}>
+            <div className="flex items-center gap-6 md:gap-10 py-4">
+              <div className="text-center">
+                <div className="text-xl md:text-2xl font-bold text-white">
+                  <AnimeCounter value={6} />
+                </div>
+                <div className="text-[10px] text-gray-500 uppercase tracking-wider">Locations</div>
+              </div>
+              <div className="w-px h-8 bg-white/10" />
+              <div className="text-center">
+                <div className="text-xl md:text-2xl font-bold text-white">
+                  <AnimeCounter value={24} suffix="/7" />
+                </div>
+                <div className="text-[10px] text-gray-500 uppercase tracking-wider">Monitoring</div>
+              </div>
+              <div className="w-px h-8 bg-white/10" />
+              <div className="text-center">
+                <div className="text-xl md:text-2xl font-bold text-emerald-400 flex items-center gap-1">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  Active
+                </div>
+                <div className="text-[10px] text-gray-500 uppercase tracking-wider">System</div>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal direction="up" delay={1.0}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <MagneticButton
                 className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
@@ -251,39 +280,9 @@ function App() {
           </ScrollReveal>
         </div>
 
-        {/* Stats bar */}
-        <ScrollReveal direction="up" delay={1.2}>
-          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex items-center gap-6 md:gap-10">
-            <div className="text-center">
-              <div className="text-xl md:text-2xl font-bold text-white">
-                <AnimeCounter value={6} />
-              </div>
-              <div className="text-[10px] text-gray-500 uppercase tracking-wider">Locations</div>
-            </div>
-            <div className="w-px h-8 bg-white/10" />
-            <div className="text-center">
-              <div className="text-xl md:text-2xl font-bold text-white">
-                <AnimeCounter value={24} suffix="/7" />
-              </div>
-              <div className="text-[10px] text-gray-500 uppercase tracking-wider">Monitoring</div>
-            </div>
-            <div className="w-px h-8 bg-white/10" />
-            <div className="text-center">
-              <div className="text-xl md:text-2xl font-bold text-emerald-400 flex items-center gap-1">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                Active
-              </div>
-              <div className="text-[10px] text-gray-500 uppercase tracking-wider">System</div>
-            </div>
-          </div>
-        </ScrollReveal>
-
         {/* Scroll indicator */}
         <motion.div
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           whileInView={{ opacity: 1 }}
@@ -321,7 +320,7 @@ function App() {
         <div className="max-w-7xl mx-auto">
           {/* Location Selector */}
           <ScrollReveal direction="up" delay={0.1}>
-          <div className="glass rounded-xl p-6 mb-8">
+          <div className="glass rounded-xl p-6 mb-8 relative">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="w-4 h-4 text-blue-400" />
               <span className="text-xs font-semibold tracking-widest text-gray-400 uppercase">
@@ -341,13 +340,14 @@ function App() {
                     setShowDropdown(true);
                   }}
                   onFocus={() => setShowDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-colors"
                   aria-label="Search location"
                 />
 
                 {/* Dropdown */}
                 {showDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-1 glass-strong rounded-lg border border-white/10 overflow-hidden z-30">
+                  <div className="absolute top-full left-0 right-0 mt-1 glass-strong rounded-lg border border-white/10 overflow-hidden z-50 shadow-2xl">
                     {filteredLocations.map((loc) => (
                       <button
                         key={loc.name}

@@ -1,21 +1,32 @@
 import React, { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { useIsMobile } from "../../hooks/useAnimations";
 
 interface RainSceneProps {
   rainIntensity: "low" | "moderate" | "high" | "extreme";
 }
 
+// Reduced particle counts for better performance
 const intensityConfig = {
-  low: { count: 500, speed: 2, spread: 20, opacity: 0.3 },
-  moderate: { count: 1500, speed: 4, spread: 25, opacity: 0.4 },
-  high: { count: 3000, speed: 6, spread: 30, opacity: 0.5 },
-  extreme: { count: 5000, speed: 9, spread: 35, opacity: 0.6 },
+  low: { count: 200, speed: 2, spread: 20, opacity: 0.3 },
+  moderate: { count: 600, speed: 4, spread: 25, opacity: 0.4 },
+  high: { count: 1200, speed: 6, spread: 30, opacity: 0.5 },
+  extreme: { count: 2000, speed: 9, spread: 35, opacity: 0.6 },
+};
+
+// Mobile gets even fewer particles
+const mobileIntensityConfig = {
+  low: { count: 80, speed: 2, spread: 20, opacity: 0.3 },
+  moderate: { count: 200, speed: 4, spread: 25, opacity: 0.4 },
+  high: { count: 400, speed: 6, spread: 30, opacity: 0.5 },
+  extreme: { count: 700, speed: 9, spread: 35, opacity: 0.6 },
 };
 
 function RainParticles({ intensity }: { intensity: "low" | "moderate" | "high" | "extreme" }) {
   const meshRef = useRef<THREE.Points>(null);
-  const config = intensityConfig[intensity];
+  const isMobile = useIsMobile();
+  const config = isMobile ? mobileIntensityConfig[intensity] : intensityConfig[intensity];
 
   const { positions, velocities } = useMemo(() => {
     const pos = new Float32Array(config.count * 3);
@@ -161,12 +172,20 @@ function FogParticles() {
 }
 
 export default function RainScene({ rainIntensity = "moderate" }: RainSceneProps) {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="absolute inset-0 z-0">
       <Canvas
         camera={{ position: [0, 5, 15], fov: 60 }}
-        dpr={[1, 1.5]}
-        gl={{ antialias: false, alpha: true }}
+        dpr={isMobile ? [1, 1] : [1, 1.5]}
+        gl={{ 
+          antialias: false, 
+          alpha: true,
+          powerPreference: "high-performance",
+          stencil: false,
+          depth: false
+        }}
       >
         <fog attach="fog" args={["#0a0a0b", 5, 35]} />
         <ambientLight intensity={0.3} />

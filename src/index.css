@@ -37,13 +37,15 @@ body {
 
 .glass {
   background: rgba(17, 17, 19, 0.7);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .glass-strong {
   background: rgba(17, 17, 19, 0.85);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -163,8 +165,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
+  filter: blur(60px);
+  opacity: 0.35;
   will-change: transform;
 }
 

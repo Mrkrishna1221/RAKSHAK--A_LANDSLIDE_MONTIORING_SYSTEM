@@ -29,9 +29,9 @@ export default function RiskFactors({ data }: RiskFactorsProps) {
     if (titleRef.current) {
       anime({
         targets: titleRef.current,
-        translateX: [-30, 0],
+        translateX: [-20, 0],
         opacity: [0, 1],
-        duration: 800,
+        duration: 500,
         easing: "easeOutExpo",
       });
     }
@@ -43,8 +43,8 @@ export default function RiskFactors({ data }: RiskFactorsProps) {
         targets: bars,
         width: (el: HTMLElement) => `${el.dataset.value}%`,
         opacity: [0, 1],
-        delay: anime.stagger(150, { start: 300 }),
-        duration: 1200,
+        delay: anime.stagger(100, { start: 200 }),
+        duration: 800,
         easing: "easeOutExpo",
       });
 
@@ -52,10 +52,10 @@ export default function RiskFactors({ data }: RiskFactorsProps) {
       const labels = barsRef.current.querySelectorAll(".factor-label");
       anime({
         targets: labels,
-        translateX: [-20, 0],
+        translateX: [-15, 0],
         opacity: [0, 1],
-        delay: anime.stagger(100, { start: 200 }),
-        duration: 600,
+        delay: anime.stagger(80, { start: 150 }),
+        duration: 400,
         easing: "easeOutExpo",
       });
 
@@ -65,8 +65,8 @@ export default function RiskFactors({ data }: RiskFactorsProps) {
         targets: badges,
         scale: [0.5, 1],
         opacity: [0, 1],
-        delay: anime.stagger(100, { start: 400 }),
-        duration: 500,
+        delay: anime.stagger(80, { start: 300 }),
+        duration: 350,
         easing: "easeOutBack",
       });
     }
@@ -75,10 +75,10 @@ export default function RiskFactors({ data }: RiskFactorsProps) {
     if (driverRef.current) {
       anime({
         targets: driverRef.current,
-        translateY: [20, 0],
+        translateY: [15, 0],
         opacity: [0, 1],
-        delay: 1000,
-        duration: 800,
+        delay: 600,
+        duration: 500,
         easing: "easeOutExpo",
       });
     }

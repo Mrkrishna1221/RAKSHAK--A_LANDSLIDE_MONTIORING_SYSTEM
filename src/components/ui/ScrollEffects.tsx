@@ -15,8 +15,8 @@ export function ScrollReveal({
   children,
   direction = "up",
   delay = 0,
-  duration = 0.8,
-  distance = 60,
+  duration = 0.5,
+  distance = 40,
   className = "",
 }: ScrollRevealProps) {
   const reducedMotion = useReducedMotion();
@@ -66,7 +66,7 @@ interface StaggerContainerProps {
 
 export function StaggerContainer({
   children,
-  staggerDelay = 0.1,
+  staggerDelay = 0.08,
   className = "",
 }: StaggerContainerProps) {
   const reducedMotion = useReducedMotion();
@@ -111,12 +111,12 @@ export function StaggerItem({ children, className = "" }: StaggerItemProps) {
     <motion.div
       className={className}
       variants={{
-        hidden: { opacity: 0, y: 30 },
+        hidden: { opacity: 0, y: 20 },
         visible: {
           opacity: 1,
           y: 0,
           transition: {
-            duration: 0.6,
+            duration: 0.4,
             ease: [0.25, 0.46, 0.45, 0.94],
           },
         },
@@ -147,11 +147,11 @@ export function ParallaxSection({
   return (
     <motion.div
       className={className}
-      initial={{ y: 100 * speed, opacity: 0 }}
+      initial={{ y: 60 * speed, opacity: 0 }}
       whileInView={{ y: 0, opacity: 1 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{
-        duration: 1.2,
+        duration: 0.6,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
     >
@@ -196,13 +196,12 @@ export function TextReveal({ text, className = "", delay = 0 }: TextRevealProps)
           key={i}
           className="inline-block mr-1"
           variants={{
-            hidden: { opacity: 0, y: 20, filter: "blur(10px)" },
+            hidden: { opacity: 0, y: 15 },
             visible: {
               opacity: 1,
               y: 0,
-              filter: "blur(0px)",
               transition: {
-                duration: 0.5,
+                duration: 0.4,
                 ease: [0.25, 0.46, 0.45, 0.94],
               },
             },

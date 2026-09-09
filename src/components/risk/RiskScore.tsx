@@ -31,7 +31,7 @@ export default function RiskScore({ data }: RiskScoreProps) {
         targets: obj,
         value: data.probability,
         round: 1,
-        duration: 2000,
+        duration: 1200,
         easing: "easeOutExpo",
         update: () => {
           if (numberRef.current) {
@@ -46,7 +46,7 @@ export default function RiskScore({ data }: RiskScoreProps) {
       anime({
         targets: circleRef.current,
         strokeDashoffset: [circumference, circumference * (1 - data.probability / 100)],
-        duration: 2000,
+        duration: 1200,
         easing: "easeOutExpo",
       });
     }
@@ -55,9 +55,9 @@ export default function RiskScore({ data }: RiskScoreProps) {
     if (cardRef.current) {
       anime({
         targets: cardRef.current,
-        translateY: [30, 0],
+        translateY: [20, 0],
         opacity: [0, 1],
-        duration: 1000,
+        duration: 600,
         easing: "easeOutExpo",
       });
     }
@@ -66,10 +66,10 @@ export default function RiskScore({ data }: RiskScoreProps) {
     if (trendRef.current) {
       anime({
         targets: trendRef.current,
-        translateX: [-20, 0],
+        translateX: [-15, 0],
         opacity: [0, 1],
-        delay: 800,
-        duration: 600,
+        delay: 400,
+        duration: 400,
         easing: "easeOutExpo",
       });
     }

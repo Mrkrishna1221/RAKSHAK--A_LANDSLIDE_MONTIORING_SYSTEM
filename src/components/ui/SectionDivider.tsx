@@ -20,7 +20,7 @@ export default function SectionDivider({ variant = "line" }: SectionDividerProps
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 1 }}
+        transition={{ duration: 0.5 }}
       >
         <div className="w-full max-w-md h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
       </motion.div>
@@ -50,7 +50,7 @@ export default function SectionDivider({ variant = "line" }: SectionDividerProps
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 1 }}
+        transition={{ duration: 0.5 }}
       >
         <svg
           className="w-full h-8 text-white/5"
@@ -65,7 +65,7 @@ export default function SectionDivider({ variant = "line" }: SectionDividerProps
             initial={{ pathLength: 0 }}
             whileInView={{ pathLength: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 2, ease: "easeInOut" }}
+            transition={{ duration: 1, ease: "easeInOut" }}
           />
         </svg>
       </motion.div>
@@ -79,7 +79,7 @@ export default function SectionDivider({ variant = "line" }: SectionDividerProps
       initial={{ scaleX: 0 }}
       whileInView={{ scaleX: 1 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
     >
       <div className="w-full max-w-xs h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
     </motion.div>

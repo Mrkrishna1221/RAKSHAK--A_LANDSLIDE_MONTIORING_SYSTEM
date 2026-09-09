@@ -18,22 +18,22 @@ export default function EarlyWarning({ data }: EarlyWarningProps) {
     // Entrance animation
     anime({
       targets: containerRef.current,
-      translateX: [-30, 0],
+      translateX: [-20, 0],
       opacity: [0, 1],
-      duration: 800,
+      duration: 500,
       easing: "easeOutExpo",
     });
 
-    // Pulse effect for VERY_HIGH
+    // Pulse effect for VERY_HIGH - reduced intensity for performance
     if (data.riskLevel === "VERY_HIGH") {
       anime({
         targets: containerRef.current,
         boxShadow: [
           "0 0 0px rgba(239, 68, 68, 0)",
-          "0 0 30px rgba(239, 68, 68, 0.2)",
+          "0 0 20px rgba(239, 68, 68, 0.15)",
           "0 0 0px rgba(239, 68, 68, 0)",
         ],
-        duration: 2000,
+        duration: 2500,
         easing: "easeInOutSine",
         loop: true,
       });
@@ -56,34 +56,41 @@ export default function EarlyWarning({ data }: EarlyWarningProps) {
       aria-live="polite"
       style={{ opacity: reducedMotion ? 1 : 0 }}
     >
-      <div className="flex items-start gap-3">
-        <div className={`p-2 rounded-lg ${isVeryHigh ? "bg-red-500/20" : "bg-amber-500/20"}`}>
+      {/* Header row */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className={`p-2.5 rounded-lg flex-shrink-0 ${isVeryHigh ? "bg-red-500/20" : "bg-amber-500/20"}`}>
           {isVeryHigh ? (
-            <ShieldAlert className={`w-5 h-5 text-red-400`} />
+            <ShieldAlert className="w-5 h-5 text-red-400" />
           ) : (
-            <AlertTriangle className={`w-5 h-5 text-amber-400`} />
+            <AlertTriangle className="w-5 h-5 text-amber-400" />
           )}
         </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className={`text-xs font-bold uppercase tracking-widest ${isVeryHigh ? "text-red-400" : "text-amber-400"}`}>
-              ⚠ Early Warning
-            </span>
-          </div>
-          <h3 className={`text-lg font-semibold mb-2 ${isVeryHigh ? "text-red-200" : "text-amber-200"}`}>
+        <div className="flex-1 min-w-0">
+          <span className={`text-xs font-bold uppercase tracking-widest block ${isVeryHigh ? "text-red-400" : "text-amber-400"}`}>
+            ⚠ Early Warning
+          </span>
+          <h3 className={`text-base md:text-lg font-semibold mt-0.5 ${isVeryHigh ? "text-red-200" : "text-amber-200"}`}>
             {isVeryHigh ? "Landslide Risk Critically Elevated" : "Landslide Risk Elevated"}
           </h3>
-          <p className="text-sm text-gray-300 mb-3">
-            Risk probability: <span className="font-semibold text-white">{data.probability}%</span>
-          </p>
-          <p className="text-sm text-gray-400 mb-3">
-            Current environmental and terrain conditions indicate {isVeryHigh ? "critically" : ""} increasing slope instability.
-          </p>
-          <div className="p-2.5 rounded-md bg-black/20 border border-white/5">
-            <span className="text-xs text-gray-500 uppercase tracking-wider">Primary driver:</span>
-            <p className="text-sm text-gray-300 mt-1">{data.primaryDriver}</p>
-          </div>
         </div>
+        {/* Risk score badge */}
+        <div className={`flex-shrink-0 text-center px-4 py-2 rounded-lg ${isVeryHigh ? "bg-red-500/20" : "bg-amber-500/20"}`}>
+          <div className={`text-2xl font-bold ${isVeryHigh ? "text-red-300" : "text-amber-300"}`}>
+            {data.probability}%
+          </div>
+          <div className="text-[10px] text-gray-400 uppercase tracking-wider">Risk Score</div>
+        </div>
+      </div>
+
+      {/* Description */}
+      <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+        Current environmental and terrain conditions indicate {isVeryHigh ? "critically " : ""}increasing slope instability.
+      </p>
+
+      {/* Primary driver */}
+      <div className="p-3 rounded-lg bg-black/20 border border-white/5">
+        <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Primary driver</span>
+        <p className="text-sm text-gray-300 mt-1.5 leading-relaxed">{data.primaryDriver}</p>
       </div>
     </div>
   );
