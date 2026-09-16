@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import anime from "animejs";
+import { Mountain, MapPin, TrendingUp } from "lucide-react";
 import { useInView, useReducedMotion } from "../../hooks/useAnimations";
 import { RiskData } from "../../data/mockRiskData";
-import { Mountain, Compass, Layers, Waves, ArrowDownCircle } from "lucide-react";
 
 interface TerrainInfoProps {
   data: RiskData;
@@ -11,77 +11,126 @@ interface TerrainInfoProps {
 export default function TerrainInfo({ data }: TerrainInfoProps) {
   const { ref, isInView } = useInView(0.2);
   const reducedMotion = useReducedMotion();
+
   const containerRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * Safe numeric values.
+   * If any property is undefined, fallback value will be used.
+   */
+  const terrain = data?.terrain as
+    | {
+        elevation?: number;
+        slope?: number;
+        aspect?: number;
+        roughness?: number;
+      }
+    | undefined;
+
+  const elevation = Number(terrain?.elevation ?? 0);
+  const slope = Number(terrain?.slope ?? 0);
+  const aspect = Number(terrain?.aspect ?? 0);
+  const roughness = Number(terrain?.roughness ?? 0);
 
   useEffect(() => {
     if (!isInView || reducedMotion || !containerRef.current) return;
 
-    const cards = containerRef.current.querySelectorAll(".terrain-card");
     anime({
-      targets: cards,
-      translateY: [40, 0],
+      targets: containerRef.current.querySelectorAll(".terrain-item"),
+      translateY: [15, 0],
       opacity: [0, 1],
-      scale: [0.9, 1],
       delay: anime.stagger(100),
-      duration: 800,
+      duration: 500,
       easing: "easeOutExpo",
     });
   }, [isInView, reducedMotion]);
 
-  const cards = [
-    {
-      icon: ArrowDownCircle,
-      label: "Elevation",
-      value: `${data.terrain.elevation.toLocaleString()} m`,
-      color: "#3b82f6",
-    },
-    {
-      icon: Mountain,
-      label: "Slope",
-      value: `${data.terrain.slope}°`,
-      color: "#10b981",
-    },
-    {
-      icon: Compass,
-      label: "Aspect",
-      value: data.terrain.aspect,
-      color: "#8b5cf6",
-    },
-    {
-      icon: Layers,
-      label: "Roughness",
-      value: data.terrain.roughness.toFixed(2),
-      color: "#f97316",
-    },
-    {
-      icon: Waves,
-      label: "Curvature",
-      value: data.terrain.curvature.toFixed(2),
-      color: "#ec4899",
-    },
-  ];
-
   return (
-    <div ref={ref} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-      <div ref={containerRef} className="contents">
-        {cards.map((card, i) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={i}
-              className="terrain-card glass rounded-lg p-4"
-              style={{ opacity: reducedMotion ? 1 : 0 }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <Icon className="w-3.5 h-3.5" style={{ color: card.color }} />
-                <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-                  {card.label}
-                </span>
-              </div>
-              <div className="text-lg font-bold text-white">{card.value}</div>
-            </div>
-          );
-        })}
+    <div ref={ref} className="glass rounded-xl p-6">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-5">
+        <Mountain className="w-5 h-5 text-emerald-400" />
+
+        <h3 className="text-sm font-semibold tracking-widest text-gray-300 uppercase">
+          Terrain Information
+        </h3>
+      </div>
+
+      <div ref={containerRef} className="grid grid-cols-2 gap-4">
+        {/* Elevation */}
+        <div
+          className="terrain-item p-3 rounded-lg bg-white/[0.03] border border-white/5"
+          style={{ opacity: reducedMotion ? 1 : 0 }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Mountain className="w-4 h-4 text-cyan-400" />
+
+            <span className="text-xs text-gray-500 uppercase">
+              Elevation
+            </span>
+          </div>
+
+          <p className="text-lg font-semibold text-gray-200">
+            {elevation.toFixed(0)}
+            <span className="text-xs text-gray-500 ml-1">m</span>
+          </p>
+        </div>
+
+        {/* Slope */}
+        <div
+          className="terrain-item p-3 rounded-lg bg-white/[0.03] border border-white/5"
+          style={{ opacity: reducedMotion ? 1 : 0 }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-4 h-4 text-amber-400" />
+
+            <span className="text-xs text-gray-500 uppercase">
+              Slope
+            </span>
+          </div>
+
+          <p className="text-lg font-semibold text-gray-200">
+            {slope.toFixed(1)}
+            <span className="text-xs text-gray-500 ml-1">°</span>
+          </p>
+        </div>
+
+        {/* Aspect */}
+        <div
+          className="terrain-item p-3 rounded-lg bg-white/[0.03] border border-white/5"
+          style={{ opacity: reducedMotion ? 1 : 0 }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin className="w-4 h-4 text-violet-400" />
+
+            <span className="text-xs text-gray-500 uppercase">
+              Aspect
+            </span>
+          </div>
+
+          <p className="text-lg font-semibold text-gray-200">
+            {aspect.toFixed(0)}
+            <span className="text-xs text-gray-500 ml-1">°</span>
+          </p>
+        </div>
+
+        {/* Roughness */}
+        <div
+          className="terrain-item p-3 rounded-lg bg-white/[0.03] border border-white/5"
+          style={{ opacity: reducedMotion ? 1 : 0 }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Mountain className="w-4 h-4 text-rose-400" />
+
+            <span className="text-xs text-gray-500 uppercase">
+              Roughness
+            </span>
+          </div>
+
+          <p className="text-lg font-semibold text-gray-200">
+            {roughness.toFixed(2)}
+          </p>
+        </div>
       </div>
     </div>
   );

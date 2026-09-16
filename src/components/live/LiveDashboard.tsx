@@ -1,283 +1,310 @@
-import React from "react";
-import { useRealTimeData } from "../../hooks/useRealTimeData";
-import { RiskData } from "../../data/mockRiskData";
-import { TimeSeriesPoint, SensorStatus } from "../../services/realTimeEngine";
-import LiveRiskGauge from "./LiveRiskGauge";
-import LiveSensorPanel from "./LiveSensorPanel";
-import LiveFeatureImportance from "./LiveFeatureImportance";
-import LivePredictionChart from "./LivePredictionChart";
-import LiveAnomalyFeed from "./LiveAnomalyFeed";
-import LiveModelMetrics from "./LiveModelMetrics";
-import LiveSensorNetwork from "./LiveSensorNetwork";
-import { Play, Pause, Activity, Radio, Wifi, WifiOff, Zap, TrendingUp } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
 
-interface LiveDashboardProps {
-  baseData: RiskData;
+interface LocationData {
+  latitude: number;
+  longitude: number;
+  accuracy: number;
 }
 
-export default function LiveDashboard({ baseData }: LiveDashboardProps) {
-  const {
-    currentReading,
-    rainfallHistory,
-    deformationHistory,
-    anomalies,
-    sensorStatuses,
-    mlOutput,
-    isRunning,
-    toggle,
-  } = useRealTimeData(baseData, 3000);
+interface WeatherData {
+  temperature: number;
+  rainfall: number;
+  precipitation: number;
+  windSpeed: number;
+  humidity: number;
+  elevation: number;
+}
 
-  if (!currentReading || !mlOutput) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex items-center gap-3 text-gray-400">
-          <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-          Initializing real-time monitoring systems...
-        </div>
-      </div>
+const LiveLocationMonitoring: React.FC = () => {
+  const [location, setLocation] = useState<LocationData | null>(null);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+
+  const getWeatherData = useCallback(
+    async (latitude: number, longitude: number) => {
+      try {
+        const weatherUrl =
+          `https://api.open-meteo.com/v1/forecast` +
+          `?latitude=${latitude}` +
+          `&longitude=${longitude}` +
+          `&current=temperature_2m,relative_humidity_2m,precipitation,rain,wind_speed_10m` +
+          `&hourly=precipitation,rain` +
+          `&forecast_days=1` +
+          `&timezone=auto`;
+
+        const elevationUrl =
+          `https://api.open-meteo.com/v1/forecast` +
+          `?latitude=${latitude}` +
+          `&longitude=${longitude}` +
+          `&current=temperature_2m` +
+          `&elevation=true`;
+
+        const [weatherResponse, elevationResponse] = await Promise.all([
+          fetch(weatherUrl),
+          fetch(elevationUrl),
+        ]);
+
+        if (!weatherResponse.ok) {
+          throw new Error("Weather API failed");
+        }
+
+        const weatherJson = await weatherResponse.json();
+        const elevationJson = await elevationResponse.json();
+
+        const current = weatherJson.current ?? {};
+
+        const weatherResult: WeatherData = {
+          temperature: Number(current.temperature_2m ?? 0),
+          rainfall: Number(current.rain ?? 0),
+          precipitation: Number(current.precipitation ?? 0),
+          windSpeed: Number(current.wind_speed_10m ?? 0),
+          humidity: Number(current.relative_humidity_2m ?? 0),
+          elevation: Number(elevationJson.elevation ?? 0),
+        };
+
+        setWeather(weatherResult);
+        setLastUpdated(new Date().toLocaleTimeString());
+        setError("");
+      } catch (err) {
+        console.error("Weather fetch error:", err);
+        setError("Unable to fetch live weather data");
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const getCurrentLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by this browser");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const locationData: LocationData = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        };
+
+        setLocation(locationData);
+
+        await getWeatherData(
+          locationData.latitude,
+          locationData.longitude
+        );
+      },
+      (geoError) => {
+        console.error("GPS error:", geoError);
+
+        let message = "Unable to access your location";
+
+        if (geoError.code === 1) {
+          message =
+            "Location permission denied. Please allow location access.";
+        } else if (geoError.code === 2) {
+          message = "Location unavailable. Try again.";
+        } else if (geoError.code === 3) {
+          message = "Location request timed out.";
+        }
+
+        setError(message);
+        setLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
     );
-  }
+  }, [getWeatherData]);
 
-  const onlineSensors = sensorStatuses.filter(s => s.status === "ONLINE").length;
-  const totalSensors = sensorStatuses.length;
-  const avgBattery = sensorStatuses.reduce((s, x) => s + x.battery, 0) / totalSensors;
-  const avgSignal = sensorStatuses.reduce((s, x) => s + x.signalStrength, 0) / totalSensors;
+  useEffect(() => {
+    getCurrentLocation();
+
+    const interval = window.setInterval(() => {
+      getCurrentLocation();
+    }, 60000);
+
+    return () => window.clearInterval(interval);
+  }, [getCurrentLocation]);
+
+  const formatNumber = (value: unknown, digits = 2) => {
+    const number = Number(value);
+    return Number.isFinite(number) ? number.toFixed(digits) : "0.00";
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Header with controls and status */}
-      <div className="glass rounded-2xl p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 flex items-center justify-center">
-                <Activity className="w-7 h-7 text-blue-400" />
-              </div>
-              {isRunning && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900 animate-pulse" />
-              )}
-            </div>
+    <section className="min-h-screen bg-[#080808] px-5 py-12 text-white">
+      {/* Heading */}
+      <div className="mx-auto mb-12 max-w-7xl text-center">
+        <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+          🛰️ Live Location Monitoring
+        </h1>
+
+        <p className="mt-4 text-lg text-gray-300">
+          Real-time weather, rainfall, and risk assessment at your exact GPS
+          coordinates
+        </p>
+
+        <p className="mt-2 text-sm text-gray-400">
+          Data sources: Open-Meteo API • Browser Geolocation • Open Elevation
+          API
+        </p>
+      </div>
+
+      <div className="mx-auto max-w-7xl">
+        {/* Brand Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-4xl font-bold">RAKSHAK</h2>
+            <p className="text-gray-300">
+              Real-Time Landslide Risk Monitoring
+            </p>
+          </div>
+
+          <button
+            onClick={getCurrentLocation}
+            disabled={loading}
+            className="rounded-xl border border-white/20 bg-white/[0.04] px-5 py-3 text-gray-300 transition hover:border-cyan-400/50 hover:bg-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            🔄 {loading ? "Refreshing..." : "Refresh"}
+          </button>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="mb-6 rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-red-300">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* Location Card */}
+        <div className="rounded-2xl border border-white/10 bg-white/[0.015] p-8 shadow-2xl">
+          <div className="mb-8 flex items-center gap-3">
+            <span className="text-3xl">📍</span>
+
             <div>
-              <h2 className="text-2xl font-bold text-white">Real-Time Monitoring</h2>
+              <h3 className="text-xl font-semibold">Live Location</h3>
               <p className="text-sm text-gray-400">
-                {baseData.location} • {baseData.latitude.toFixed(4)}°N, {baseData.longitude.toFixed(4)}°E
+                GPS position updated automatically
+              </p>
+            </div>
+
+            <span className="ml-auto rounded-full border border-green-400/30 bg-green-400/10 px-3 py-1 text-xs text-green-300">
+              ● LIVE
+            </span>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            <div>
+              <p className="mb-2 text-sm text-gray-400">Latitude</p>
+              <p className="text-lg font-medium">
+                {location
+                  ? `${formatNumber(location.latitude, 6)}°`
+                  : "Detecting..."}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-sm text-gray-400">Longitude</p>
+              <p className="text-lg font-medium">
+                {location
+                  ? `${formatNumber(location.longitude, 6)}°`
+                  : "Detecting..."}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-sm text-gray-400">Accuracy</p>
+              <p className="text-lg font-medium">
+                {location
+                  ? `±${Math.round(location.accuracy)}m`
+                  : "Detecting..."}
               </p>
             </div>
           </div>
+        </div>
 
-          <div className="flex items-center gap-3">
-            {/* System status */}
-            <div className="hidden md:flex items-center gap-4 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex items-center gap-2">
-                <Wifi className="w-4 h-4 text-green-400" />
-                <span className="text-xs text-gray-300">
-                  <span className="font-semibold text-green-400">{onlineSensors}</span>/{totalSensors} Online
-                </span>
-              </div>
-              <div className="w-px h-4 bg-white/10" />
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-yellow-400" />
-                <span className="text-xs text-gray-300">
-                  <span className="font-semibold text-yellow-400">{avgBattery.toFixed(0)}%</span> Battery
-                </span>
-              </div>
-              <div className="w-px h-4 bg-white/10" />
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-blue-400" />
-                <span className="text-xs text-gray-300">
-                  <span className="font-semibold text-blue-400">{avgSignal.toFixed(0)}%</span> Signal
-                </span>
-              </div>
+        {/* Live Weather Data */}
+        <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+            <p className="text-sm text-gray-400">🌡️ Temperature</p>
+            <p className="mt-3 text-3xl font-bold">
+              {weather ? `${formatNumber(weather.temperature, 1)}°C` : "--"}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+            <p className="text-sm text-gray-400">🌧️ Rainfall</p>
+            <p className="mt-3 text-3xl font-bold">
+              {weather ? `${formatNumber(weather.rainfall, 2)} mm` : "--"}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+            <p className="text-sm text-gray-400">💨 Wind Speed</p>
+            <p className="mt-3 text-3xl font-bold">
+              {weather ? `${formatNumber(weather.windSpeed, 1)} km/h` : "--"}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+            <p className="text-sm text-gray-400">⛰️ Elevation</p>
+            <p className="mt-3 text-3xl font-bold">
+              {weather ? `${formatNumber(weather.elevation, 0)} m` : "--"}
+            </p>
+          </div>
+        </div>
+
+        {/* Additional Data */}
+        <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+          <div className="grid gap-6 md:grid-cols-3">
+            <div>
+              <p className="text-sm text-gray-400">💧 Humidity</p>
+              <p className="mt-2 text-xl font-semibold">
+                {weather ? `${formatNumber(weather.humidity, 0)}%` : "--"}
+              </p>
             </div>
 
-            {/* Live indicator */}
-            {isRunning && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-full">
-                <div className="relative">
-                  <div className="w-2 h-2 bg-green-400 rounded-full" />
-                  <div className="absolute inset-0 w-2 h-2 bg-green-400 rounded-full animate-ping" />
-                </div>
-                <span className="text-xs text-green-400 font-semibold">LIVE</span>
-              </div>
-            )}
+            <div>
+              <p className="text-sm text-gray-400">🌦️ Precipitation</p>
+              <p className="mt-2 text-xl font-semibold">
+                {weather
+                  ? `${formatNumber(weather.precipitation, 2)} mm`
+                  : "--"}
+              </p>
+            </div>
 
-            {/* Control button */}
-            <button
-              onClick={toggle}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${
-                isRunning
-                  ? "bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20"
-                  : "bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500 shadow-lg shadow-blue-500/20"
-              }`}
-            >
-              {isRunning ? (
-                <>
-                  <Pause className="w-4 h-4" />
-                  Pause
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4" />
-                  Start Live Feed
-                </>
-              )}
-            </button>
+            <div>
+              <p className="text-sm text-gray-400">🕒 Last Updated</p>
+              <p className="mt-2 text-xl font-semibold">
+                {lastUpdated ?? "Updating..."}
+              </p>
+            </div>
           </div>
+        </div>
+
+        {/* Sources */}
+        <div className="mt-8 text-center text-sm text-gray-400">
+          <p>
+            Data sources: Open-Meteo weather API • Browser Geolocation API
+          </p>
+
+          <p className="mt-2">
+            Last updated: {lastUpdated ?? "Fetching live data..."}
+          </p>
         </div>
       </div>
-
-      {/* Main grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left column - Risk gauge and metrics */}
-        <div className="lg:col-span-4 space-y-6">
-          <LiveRiskGauge mlOutput={mlOutput} />
-          <LiveModelMetrics metrics={mlOutput.modelMetrics} />
-        </div>
-
-        {/* Middle column - Sensors and features */}
-        <div className="lg:col-span-4 space-y-6">
-          <LiveSensorPanel reading={currentReading} />
-          <LiveFeatureImportance features={mlOutput.featureImportance} />
-        </div>
-
-        {/* Right column - Predictions and anomalies */}
-        <div className="lg:col-span-4 space-y-6">
-          <LivePredictionChart
-            predictions={mlOutput.predictions24h}
-            confidenceInterval={mlOutput.confidenceInterval}
-          />
-          <LiveAnomalyFeed anomalies={anomalies} />
-        </div>
-      </div>
-
-      {/* Full-width sensor network */}
-      <LiveSensorNetwork sensors={sensorStatuses} />
-
-      {/* Time series charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-blue-400" />
-              Rainfall Time Series (48h)
-            </h3>
-            <span className="text-xs text-gray-500">
-              Last: {currentReading.rainfall.toFixed(1)} mm/hr
-            </span>
-          </div>
-          <div className="h-48">
-            <RainfallChart data={rainfallHistory} />
-          </div>
-        </div>
-
-        <div className="glass rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-amber-400" />
-              Ground Deformation (48h)
-            </h3>
-            <span className="text-xs text-gray-500">
-              Last: {currentReading.groundDisplacement.toFixed(2)} mm
-            </span>
-          </div>
-          <div className="h-48">
-            <DeformationChart data={deformationHistory} />
-          </div>
-        </div>
-      </div>
-    </div>
+    </section>
   );
-}
+};
 
-// Enhanced chart components
-function RainfallChart({ data }: { data: TimeSeriesPoint[] }) {
-  if (data.length === 0) return <div className="text-gray-500 text-sm">No data</div>;
-
-  const max = Math.max(...data.map((d) => d.value));
-  const width = 100;
-  const height = 100;
-
-  const points = data
-    .map((d, i) => {
-      const x = (i / (data.length - 1)) * width;
-      const y = height - (d.value / max) * height;
-      return `${x},${y}`;
-    })
-    .join(" ");
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="rainGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
-          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1" />
-        </linearGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="0.5" result="coloredBlur" />
-          <feMerge>
-            <feMergeNode in="coloredBlur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-      <polygon
-        points={`0,${height} ${points} ${width},${height}`}
-        fill="url(#rainGradient)"
-      />
-      <polyline
-        points={points}
-        fill="none"
-        stroke="#3b82f6"
-        strokeWidth="0.5"
-        vectorEffect="non-scaling-stroke"
-        filter="url(#glow)"
-      />
-    </svg>
-  );
-}
-
-function DeformationChart({ data }: { data: TimeSeriesPoint[] }) {
-  if (data.length === 0) return <div className="text-gray-500 text-sm">No data</div>;
-
-  const max = Math.max(...data.map((d) => d.value));
-  const width = 100;
-  const height = 100;
-
-  const points = data
-    .map((d, i) => {
-      const x = (i / (data.length - 1)) * width;
-      const y = height - (d.value / max) * height;
-      return `${x},${y}`;
-    })
-    .join(" ");
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="defGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.8" />
-          <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.1" />
-        </linearGradient>
-        <filter id="glow2">
-          <feGaussianBlur stdDeviation="0.5" result="coloredBlur" />
-          <feMerge>
-            <feMergeNode in="coloredBlur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-      <polygon
-        points={`0,${height} ${points} ${width},${height}`}
-        fill="url(#defGradient)"
-      />
-      <polyline
-        points={points}
-        fill="none"
-        stroke="#f59e0b"
-        strokeWidth="0.5"
-        vectorEffect="non-scaling-stroke"
-        filter="url(#glow2)"
-      />
-    </svg>
-  );
-}
+export default LiveLocationMonitoring;

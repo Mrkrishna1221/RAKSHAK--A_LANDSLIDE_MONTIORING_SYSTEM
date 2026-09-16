@@ -1,171 +1,161 @@
-import React, { useRef, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import * as THREE from "three";
-import { useIsMobile } from "../../hooks/useAnimations";
+import React from "react";
+import type { RiskLevel } from "../../data/mockRiskData";
 
 interface TerrainSceneProps {
-  riskLevel: "LOW" | "MODERATE" | "HIGH" | "VERY_HIGH";
+  riskLevel: RiskLevel;
   rainfallIntensity?: number;
   deformationLevel?: number;
 }
 
-const riskColors = {
+const riskColors: Record<RiskLevel, string> = {
   LOW: "#22c55e",
   MODERATE: "#eab308",
   HIGH: "#f97316",
-  VERY_HIGH: "#ef4444",
+  "VERY HIGH": "#ef4444",
+  CRITICAL: "#dc2626",
 };
 
-function RiskTerrain({ riskLevel, rainfallIntensity = 50, deformationLevel = 30 }: TerrainSceneProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const wireRef = useRef<THREE.LineSegments>(null);
-  const isMobile = useIsMobile();
-
-  const geometry = useMemo(() => {
-    // Reduced resolution for better performance
-    const segments = isMobile ? 30 : 50;
-    const geo = new THREE.PlaneGeometry(12, 12, segments, segments);
-    const pos = geo.attributes.position;
-    for (let i = 0; i < pos.count; i++) {
-      const x = pos.getX(i);
-      const z = pos.getY(i);
-      const height =
-        Math.sin(x * 0.5) * Math.cos(z * 0.5) * 1.5 +
-        Math.sin(x * 1.2 + 0.5) * Math.cos(z * 0.8 + 1) * 0.8 +
-        Math.sin(x * 0.2) * Math.cos(z * 0.2) * 2 +
-        Math.sin(x * 2.5) * Math.cos(z * 2.5) * 0.3;
-      pos.setZ(i, height);
-    }
-    geo.computeVertexNormals();
-    return geo;
-  }, []);
-
-  const wireGeometry = useMemo(() => {
-    return new THREE.WireframeGeometry(geometry);
-  }, [geometry]);
-
-  const color = riskColors[riskLevel];
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = -Math.PI / 2.2;
-      meshRef.current.position.y = -1;
-      const t = state.clock.elapsedTime;
-      meshRef.current.rotation.z = Math.sin(t * 0.2) * 0.03;
-    }
-    if (wireRef.current) {
-      wireRef.current.rotation.x = -Math.PI / 2.2;
-      wireRef.current.position.y = -0.98;
-      const t = state.clock.elapsedTime;
-      wireRef.current.rotation.z = Math.sin(t * 0.2) * 0.03;
-    }
-  });
-
-  return (
-    <group>
-      <mesh ref={meshRef} geometry={geometry}>
-        <meshStandardMaterial
-          color={color}
-          flatShading
-          transparent
-          opacity={0.35}
-          emissive={color}
-          emissiveIntensity={0.15}
-        />
-      </mesh>
-      <lineSegments ref={wireRef} geometry={wireGeometry}>
-        <lineBasicMaterial color={color} transparent opacity={0.25} />
-      </lineSegments>
-    </group>
-  );
-}
-
-function RiskIndicators({ riskLevel }: { riskLevel: string }) {
-  const ref = useRef<THREE.Group>(null);
-  const count = riskLevel === "VERY_HIGH" ? 8 : riskLevel === "HIGH" ? 5 : riskLevel === "MODERATE" ? 3 : 1;
-  const color = riskColors[riskLevel as keyof typeof riskColors];
-
-  const positions = useMemo(() => {
-    const pos = [];
-    for (let i = 0; i < count; i++) {
-      pos.push({
-        x: (Math.random() - 0.5) * 8,
-        y: Math.random() * 2 + 0.5,
-        z: (Math.random() - 0.5) * 8,
-      });
-    }
-    return pos;
-  }, [count]);
-
-  useFrame((state) => {
-    if (!ref.current) return;
-    ref.current.children.forEach((child, i) => {
-      const t = state.clock.elapsedTime + i * 0.5;
-      child.position.y = positions[i].y + Math.sin(t) * 0.3;
-      (child as THREE.Mesh).scale.setScalar(0.8 + Math.sin(t * 2) * 0.2);
-    });
-  });
-
-  return (
-    <group ref={ref}>
-      {positions.map((pos, i) => (
-        <mesh key={i} position={[pos.x, pos.y, pos.z]}>
-          <sphereGeometry args={[0.08, 8, 8]} />
-          <meshBasicMaterial color={color} transparent opacity={0.8} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function ContourLines() {
-  const ref = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (ref.current) {
-      ref.current.rotation.z = state.clock.elapsedTime * 0.05;
-    }
-  });
-
-  return (
-    <group ref={ref} position={[0, -2.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-      {[2, 3.5, 5, 6.5].map((radius, i) => (
-        <mesh key={i}>
-          <ringGeometry args={[radius - 0.02, radius + 0.02, 64]} />
-          <meshBasicMaterial color="#1e3a5f" transparent opacity={0.3 - i * 0.05} side={THREE.DoubleSide} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
 export default function TerrainScene({
-  riskLevel = "MODERATE",
-  rainfallIntensity = 50,
-  deformationLevel = 30,
+  riskLevel,
+  rainfallIntensity = 0,
+  deformationLevel = 0,
 }: TerrainSceneProps) {
-  const isMobile = useIsMobile();
-  
+  const color = riskColors[riskLevel] ?? "#22c55e";
+
+  const intensity = Math.min(
+    100,
+    Math.max(
+      10,
+      rainfallIntensity * 0.6 + deformationLevel * 10
+    )
+  );
+
   return (
-    <div className="w-full h-full">
-      <Canvas
-        camera={{ position: [0, 4, 10], fov: 50 }}
-        dpr={isMobile ? [1, 1] : [1, 1.5]}
-        gl={{ 
-          antialias: !isMobile, 
-          alpha: true,
-          powerPreference: "high-performance",
-          stencil: false
+    <div className="relative w-full h-full min-h-[260px] overflow-hidden rounded-xl bg-[#06141c]">
+      {/* Background glow */}
+      <div
+        className="absolute inset-0 opacity-30"
+        style={{
+          background: `radial-gradient(circle at center, ${color}55, transparent 65%)`,
         }}
-      >
-        <fog attach="fog" args={["#0a0a0b", 8, 25]} />
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[3, 8, 5]} intensity={0.6} color="#8ab4f8" />
-        <pointLight position={[-3, 3, -3]} intensity={0.3} color={riskColors[riskLevel]} />
-        <RiskTerrain riskLevel={riskLevel} rainfallIntensity={rainfallIntensity} deformationLevel={deformationLevel} />
-        <RiskIndicators riskLevel={riskLevel} />
-        <ContourLines />
-      </Canvas>
+      />
+
+      {/* Grid */}
+      <div
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: `
+            linear-gradient(${color}55 1px, transparent 1px),
+            linear-gradient(90deg, ${color}55 1px, transparent 1px)
+          `,
+          backgroundSize: "32px 32px",
+          transform: "perspective(500px) rotateX(58deg) scale(1.5)",
+          transformOrigin: "center bottom",
+        }}
+      />
+
+      {/* Mountain terrain */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="relative w-[85%] h-[65%]"
+          style={{
+            transform: "perspective(700px) rotateX(55deg) rotateZ(-5deg)",
+          }}
+        >
+          {/* Mountain layers */}
+          {[0, 1, 2, 3, 4].map((layer) => (
+            <div
+              key={layer}
+              className="absolute left-1/2 top-1/2 rounded-full border"
+              style={{
+                width: `${90 - layer * 15}%`,
+                height: `${75 - layer * 11}%`,
+                transform: "translate(-50%, -50%)",
+                borderColor: `${color}${35 + layer * 8}`,
+                boxShadow: `0 0 25px ${color}22`,
+                animation: `terrainPulse ${
+                  4 + layer
+                }s ease-in-out infinite alternate`,
+              }}
+            />
+          ))}
+
+          {/* Center peak */}
+          <div
+            className="absolute left-1/2 top-1/2 w-24 h-24 rounded-full"
+            style={{
+              transform: "translate(-50%, -50%)",
+              background: `radial-gradient(circle, ${color}99, ${color}22, transparent 70%)`,
+              boxShadow: `0 0 45px ${color}66`,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Floating risk points */}
+      {Array.from({ length: 12 }).map((_, index) => (
+        <span
+          key={index}
+          className="absolute w-1.5 h-1.5 rounded-full animate-pulse"
+          style={{
+            backgroundColor: color,
+            boxShadow: `0 0 10px ${color}`,
+            left: `${15 + ((index * 37) % 70)}%`,
+            top: `${18 + ((index * 23) % 65)}%`,
+            animationDelay: `${index * 0.2}s`,
+          }}
+        />
+      ))}
+
+      {/* Header label */}
+      <div className="absolute top-4 left-4 z-10">
+        <div className="text-[10px] uppercase tracking-[0.25em] text-gray-500">
+          3D Terrain Simulation
+        </div>
+
+        <div
+          className="mt-1 text-sm font-semibold"
+          style={{ color }}
+        >
+          {riskLevel} RISK TERRAIN
+        </div>
+      </div>
+
+      {/* Bottom data */}
+      <div className="absolute bottom-4 left-4 right-4 z-10 flex justify-between text-[10px] text-gray-400">
+        <span>
+          Rainfall:{" "}
+          <strong className="text-white">
+            {rainfallIntensity.toFixed(1)}
+          </strong>
+        </span>
+
+        <span>
+          Deformation:{" "}
+          <strong className="text-white">
+            {deformationLevel.toFixed(2)}
+          </strong>
+        </span>
+
+        <span style={{ color }}>
+          Intensity: {intensity.toFixed(0)}%
+        </span>
+      </div>
+
+      <style>
+        {`
+          @keyframes terrainPulse {
+            from {
+              opacity: 0.35;
+              transform: translate(-50%, -50%) scale(0.96);
+            }
+            to {
+              opacity: 0.9;
+              transform: translate(-50%, -50%) scale(1.04);
+            }
+          }
+        `}
+      </style>
     </div>
   );
 }
